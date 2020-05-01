@@ -1,0 +1,3 @@
+* Get album information and divide cached songs in album folders
+* Show estimated time on artist update
+* Fix unicode bugs
