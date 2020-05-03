@@ -20,6 +20,7 @@ def get_songs_by_artist(artist, force_update):
     print(f"Finding songs by '{artist}'")
     artist_id = find_artist_id(artist)
 
+    cached_count = 0
     if force_update:
         print("Forcing cached songs update...")
         with open(misc.CACHE_PATH, 'r+') as fd:
@@ -27,13 +28,17 @@ def get_songs_by_artist(artist, force_update):
             try:
                 del cache_json["artists"][artist]
             except:
-                print("Artist was not found in cache. Ignoring --force-update.")
-
-    song_objs = import_cached_songs(artist)
-    print(f"Found {len(song_objs)} cached songs.")
+                print("Artist was not found in cache. Ignoring --force.")
+            update_cache_json(cache_json, fd)
+        song_objs = {}
+    else:
+        song_objs = import_cached_songs(artist)
+        cached_count = len(song_objs)
+        print(f"Found {cached_count} cached songs.")
 
     download_songs(artist_id, artist, song_objs)
-    save_songs(song_objs)
+    if cached_count != len(song_objs):
+        save_songs(song_objs)
 
 def import_cached_songs(artist):
     song_objs = {}
@@ -41,11 +46,12 @@ def import_cached_songs(artist):
     with open(misc.CACHE_PATH, 'r') as fd:
         cache_json = json.load(fd)
         try:
-            songs = cache_json["artist"]
+            songs = cache_json["artists"][artist]["songs"]
         except KeyError:
             return {}
     for song_json in songs.values():
-        song_objs[new_song_obj.title] = init_cached_song(song_json)
+        new_song_obj = init_cached_song(song_json)
+        song_objs[new_song_obj.title] = new_song_obj
     return song_objs
 
 def save_songs(song_objs):
@@ -60,9 +66,12 @@ def save_single_song(song_obj):
         if song_obj.artist not in cache_json["artists"]:
             cache_json["artists"][song_obj.artist] = {"songs": {}}
         cache_json["artists"][song_obj.artist]["songs"][song_obj.title] = song_obj.dump()
-        fd.truncate(0)
-        fd.seek(0)
-        json.dump(cache_json, fd)
+        update_cache_json(cache_json, fd)
+
+def update_cache_json(cache_json, fd):
+    fd.truncate(0)
+    fd.seek(0)
+    json.dump(cache_json, fd)
 
 def find_lyrics(args):
     parser = argparse.ArgumentParser()

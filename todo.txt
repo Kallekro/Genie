@@ -1,3 +1,4 @@
+* Refactor cache code to seperate module
 * Optimize cache read/write by sharing global file pointer
 * Fix unicode bugs
 * Show estimated time on artist update
