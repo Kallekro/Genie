@@ -80,7 +80,6 @@ def download_single_song(song_name, artist):
 
     print("Song found. Downloading lyrics...")
     new_song_obj.lyrics = download_lyrics(new_song_obj)
-
     return new_song_obj
 
 def download_lyrics_async(song_objs):

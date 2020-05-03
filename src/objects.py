@@ -16,16 +16,11 @@ class Song:
         self.raw = song_data
 
     def initialize_from_cache(self, cached_song):
-        if isinstance(cached_song, str):
-            with open(cached_song, 'r') as song_fd:
-                song_json = json.load(song_fd)
-        else:
-            song_json = cached_song
-        self.title  = song_json["meta"]["title"]
-        self.artist = song_json["meta"]["artist"]
-        self.url    = song_json["meta"]["url"]
-        self.lyrics = song_json["lyrics"]
-        self.raw    = song_json["raw"]
+        self.title  = cached_song["meta"]["title"]
+        self.artist = cached_song["meta"]["artist"]
+        self.url    = cached_song["meta"]["url"]
+        self.lyrics = cached_song["lyrics"]
+        self.raw    = cached_song["raw"]
         self.cached = True
 
     def dump(self):
